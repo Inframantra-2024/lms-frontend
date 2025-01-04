@@ -42,7 +42,7 @@ export default function Login() {
         email: "",
         password: "",
       });
-      navigate("/");
+      navigate("/home");
     }
     setIsLoading(false);
   }

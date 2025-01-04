@@ -1,15 +1,18 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState, useEffect } from "react";
 import { createNewCourse } from "../../Redux/Slices/CourseSlice";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../Layout/Layout";
 import toast from "react-hot-toast";
 import InputBox from "../../Components/InputBox/InputBox";
 import TextArea from "../../Components/InputBox/TextArea";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllCategory } from "../../Redux/Slices/categorySlice";
 
 export default function CreateCourse() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { categoryList } = useSelector((state) => state.category);
+  console.log(categoryList);
 
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
   const [userInput, setUserInput] = useState({
@@ -20,6 +23,10 @@ export default function CreateCourse() {
     thumbnail: null,
     previewImage: "",
   });
+
+  useEffect(() => {
+    dispatch(getAllCategory());
+  }, [dispatch]);
 
   function handleImageUpload(e) {
     e.preventDefault();
@@ -55,7 +62,7 @@ export default function CreateCourse() {
       !userInput.createdBy ||
       !userInput.thumbnail
     ) {
-      toast.error("All field are required!");
+      toast.error("All fields are required!");
       return;
     }
 
@@ -77,6 +84,9 @@ export default function CreateCourse() {
         thumbnail: null,
         previewImage: "",
       });
+      toast.success("Course created successfully!");
+    } else {
+      toast.error("Failed to create course!");
     }
     setIsCreatingCourse(false);
   }
@@ -88,20 +98,21 @@ export default function CreateCourse() {
           onSubmit={onFormSubmit}
           autoComplete="off"
           noValidate
-          className="flex flex-col dark:bg-base-100 gap-7 rounded-lg md:py-5 py-7 md:px-7 px-3 md:w-[750px] w-full shadow-custom dark:shadow-xl  "
+          className="flex flex-col dark:bg-base-100 gap-7 rounded-lg md:py-5 py-7 md:px-7 px-3 md:w-[750px] w-full shadow-custom dark:shadow-xl"
         >
           <h1 className="text-center dark:text-purple-500 text-4xl font-bold font-inter">
             Create New Course
           </h1>
           <div className="w-full flex md:flex-row md:justify-between justify-center flex-col md:gap-0 gap-5">
             <div className="md:w-[48%] w-full flex flex-col gap-5">
-              {/* thumbnail */}
+              {/* Thumbnail */}
               <div className="border border-gray-300">
                 <label htmlFor="image_uploads" className="cursor-pointer">
                   {userInput.previewImage ? (
                     <img
                       className="w-full h-44 m-auto"
                       src={userInput.previewImage}
+                      alt="Course Thumbnail Preview"
                     />
                   ) : (
                     <div className="w-full h-44 m-auto flex items-center justify-center">
@@ -120,7 +131,7 @@ export default function CreateCourse() {
                   onChange={handleImageUpload}
                 />
               </div>
-              {/* title */}
+              {/* Title */}
               <InputBox
                 label={"Title"}
                 name={"title"}
@@ -131,25 +142,37 @@ export default function CreateCourse() {
               />
             </div>
             <div className="md:w-[48%] w-full flex flex-col gap-5">
-              {/* instructor */}
+              {/* Instructor */}
               <InputBox
                 label={"Instructor"}
                 name={"createdBy"}
                 type={"text"}
-                placeholder={"Enter Course instructor"}
+                placeholder={"Enter Course Instructor"}
                 onChange={handleUserInput}
                 value={userInput.createdBy}
               />
-              {/* category */}
-              <InputBox
-                label={"Category"}
-                name={"category"}
-                type={"text"}
-                placeholder={"Enter Course Category"}
-                onChange={handleUserInput}
-                value={userInput.category}
-              />
-              {/* description */}
+              {/* Category */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="category" className="font-bold">
+                  Category
+                </label>
+                <select
+                  id="category"
+                  name="category"
+                  value={userInput.category}
+                  onChange={handleUserInput}
+                  className="border rounded-md p-2"
+                >
+                  <option value="">Select a category</option>
+                  {categoryList &&
+                    categoryList.map((category) => (
+                      <option key={category.id} value={category.category}>
+                        {category.category}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              {/* Description */}
               <TextArea
                 label={"Description"}
                 name={"description"}
@@ -162,11 +185,11 @@ export default function CreateCourse() {
             </div>
           </div>
 
-          {/* submit btn */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isCreatingCourse}
-            className="mt-3 bg-yellow-500 text-white dark:text-base-200  transition-all ease-in-out duration-300 rounded-md py-2 font-nunito-sans font-[500]  text-lg cursor-pointer"
+            className="mt-3 bg-yellow-500 text-white dark:text-base-200 transition-all ease-in-out duration-300 rounded-md py-2 font-nunito-sans font-[500] text-lg cursor-pointer"
           >
             {isCreatingCourse ? "Creating Course..." : "Create Course"}
           </button>
